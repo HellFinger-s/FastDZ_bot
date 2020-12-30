@@ -1,5 +1,5 @@
 <?php
-$bot_token = '1278159311:AAFScj8Om-XoL-8h59PDDvzZXS_gRolJwaM';
+$botToken = '1278159311:AAFScj8Om-XoL-8h59PDDvzZXS_gRolJwaM';
 $td_parameters = [
     'api_id' => '425178' ,
     'api_hash' => 'a47dce755a2fb2099b7d3f462196c7b1',
@@ -26,31 +26,28 @@ $opt = [
 $pdo = new PDO($dsn, $user, $pass, $opt);
 $id = false;
 $client = td_json_client_create();
-td_json_client_send($client,json_encode(['@type' => 'setLogVerbosityLevel', 'new_verbosity_level' => '1']));
-$result = td_json_client_execute($client, json_encode(['@type' => 'getAuthorizationState']));
-
-
+td_json_client_send($client,json_encode(['@type' => 'setLogVerbosityLevel', 'new_verbosity_level' => '3']));
+$result = td_json_client_execute($client, json_encode(['@typ' => 'getAuthorizationState']));
 
 while (true) {//основной цикл | main loop
     $res = td_json_client_receive($client, 10);
     $update = json_decode($res, true);
-    var_dump($update);
     switch ($update['@type']):
-
         case 'updateAuthorizationState'://обработка авторизации | authorization processing
             switch ($update['authorization_state']['@type']):
                 case 'authorizationStateWaitTdlibParameters':
                     $query = json_encode(['@type' => 'setTdlibParameters', 'parameters' => $td_parameters]);
                     td_json_client_send($client,$query);
-                    var_dump('1');
                     break;
                 case 'authorizationStateWaitEncryptionKey':
                     $query = json_encode(['@type' => 'checkDatabaseEncryptionKey', 'encryption_key' => '']);
                     td_json_client_send($client,$query);
-                    var_dump('2');
+                    break;
+                case 'authorizationStateWaitPhoneNumber':
+                    $query = json_encode(['@type' => 'checkAuthenticationBotToken', 'token' => $botToken]);
+                    td_json_client_send($client,$query);
                     break;
                 case 'authorizationStateReady':
-                    var_dump('AAAAAAAAAAAAAAAAAAAAAAAAAAAA');
                     print('AUTHORIZATION IS COMPLETE').PHP_EOL;;
                     break;
             endswitch;
@@ -60,126 +57,108 @@ while (true) {//основной цикл | main loop
             switch($update['message']['content']['@type']){
                 case 'messageText':
                     if($update['message']['is_outgoing'] == false) {
-                        $chat_id = $update['message']['chat_id'];
+                        $chatId = $update['message']['chat_id'];
                         $text = $update['message']['content']['text']['text'];
-                        $message_id = $update['message']['id'];
+                        $messageId = $update['message']['id'];
                         switch ($text) {//обработка текста сообщения | handle message text
                             case '/start':
                                 $data = $pdo->query('SELECT `userId` FROM `userInfo`')->fetchAll(PDO::FETCH_COLUMN);
-                                if (in_array($chat_id, $data) == false) {//обработка нового пользователя | handle new user
+                                if (in_array($chatId, $data) == false) {//обработка нового пользователя | handle new user
                                     $statement = $pdo->prepare('INSERT INTO `userInfo` SET `userId` = :userId, `userBalance` = :userBalance, `freeDays` = :freeDays, `waitingSum` = :waitingSum');
-                                    $statement->execute(array('userId' => $chat_id, 'userBalance' => 0, 'freeDays' => 3, 'waitingSum' => 0));
+                                    $statement->execute(array('userId' => $chatId, 'userBalance' => 0, 'freeDays' => 3, 'waitingSum' => 0));
                                 }
-                                $freeDays = getLineWithCertainUIDFromBD($chat_id, $pdo)[0]['freeDays'];
+                                $freeDays = getLineWithCertainUIDFromBD($chatId, $pdo)[0]['freeDays'];
                                 switch($freeDays){//обработка разного количества оставшихся бесплатных дней | handle different number of remaining free days
                                     case 1:
-                                        sendTextMessage('Привет, отправь мне ссылку на тест, чтобы получить ответы. Если тебе нужна помощь, отправь мне /help. Сейчас у тебя есть '.$freeDays.' бесплатный день. Когда они закончатся ответ на тест будет списывать 2 рубля с твоего баланса. Пополниь его ты можешь, отправив мне команду /pay',
-                                            $client, $chat_id, [[['Помощь'=>'/help'], ['Баланс'=>'/balance']], [['Пополнить'=>'/pay'], ['Выйти'=>'/exit']]]);
+                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатный день. Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить.',
+                                            $client, $chatId);
                                         break;
                                     case 0:
-                                        sendTextMessage('Привет, отправь мне ссылку на тест, чтобы получить ответы. Если тебе нужна помощь, отправь мне /help. Сейчас у тебя есть '.$freeDays.' бесплатных дней на тест. Когда они закончатся ответ на тест будет списывать 2 рубля с твоего баланса. Пополниь его ты можешь, отправив мне команду /pay',
-                                            $client, $chat_id, [[['Помощь'=>'/help'], ['Баланс'=>'/balance']], [['Пополнить'=>'/pay'], ['Выйти'=>'/exit']]]);
+                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатных дней. Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить.',
+                                            $client, $chatId);
                                         break;
                                     default:
-                                        sendTextMessage('Привет, отправь мне ссылку на тест, чтобы получить ответы. Если тебе нужна помощь, отправь мне /help. Сейчас у тебя есть '.$freeDays.' бесплатных дня на тест. Когда они закончатся ответ на тест будет списывать 2 рубля с твоего баланса. Пополниь его ты можешь, отправив мне команду /pay',
-                                            $client, $chat_id, [[['Помощь'=>'/help'], ['Баланс'=>'/balance']], [['Пополнить'=>'/pay'], ['Выйти'=>'/exit']]]);
+                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатных дня.  Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить.',
+                                            $client, $chatId);
+                                }
+                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/ex.jpeg', $client, $chatId, 'Для этой книги нужно отправить мне сообщение формата 5-358-00257-X/YY');
+                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/button.jpeg', $client, $chatId, 'Так же управлять мной ты можешь с помощью интерактивной панели с кнопками, которую ты откроешь нажав на кнопку в телеграм');
+                                break;
+                            case 'помощь':// user need help
+                                sendTextMessage('отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Пополнить баланс ты можешь, написав мне пополнить.',
+                                    $client, $chatId);
+                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/ex.jpeg', $client, $chatId);
+                                break;
+                            case 'баланс':// user want to know his balance
+                                $answerFromBd = getLineWithCertainUIDFromBD($chatId, $pdo);
+                                $balance = $answerFromBd[0]['userBalance'];
+                                sendTextMessage('Ваш текущий баланс: ' . $balance . ' рублей.', $client, $chatId);
+                                break;
+                            case 'пополнить':// user want to pay
+                                sendTextMessage('Введите целое, больше 59 число, на которое будет пополнен баланс. Напишите /exit, чтобы выйти из оплаты', $client, $chatId);
+                                $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSum` = :waitingSum WHERE `userId` =:userId');
+                                $statement->execute(array('userId' => $chatId, 'waitingSum' => 1));
+                                break;
+                            case 'выход':// exit from payment
+                                sendTextMessage('Вы вышли из оплаты', $client, $chatId);
+                                $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSum` = :waitingSum WHERE `userId` =:userId');
+                                $statement->execute(array('userId' => $chatId, 'waitingSum' => 0));
+                                break;
+                            case '⬅'://предыдущая фотография | previous photo
+                                $answerFromBd = getLineWithCertainUIDFromBD($chatId, $pdo);
+                                $prevIsbn = $answerFromBd[0]['lastISBN'];
+                                $newIsbn = substr($prevIsbn, 0, strpos($prevIsbn, '/')+1).(string)((int)(substr($prevIsbn, strpos($prevIsbn, '/')+1))-1);
+                                if(file_exists($pathToIsbns.$newIsbn.'.jpeg')) {
+                                    if(checkTime($pdo, $chatId, $client) != "empty balance") {
+                                        sendPhoto($pathToIsbns.$newIsbn.'.jpeg', $client, $chatId);
+                                        updatePhotoInfo($pdo, $chatId, $newIsbn);
+                                    }
+                                } else {
+                                    sendTextMessage('Извините, я не нашел такого фото.', $client, $chatId);
                                 }
                                 break;
-                            case '/help':
-                                sendTextMessage('Отправь мне ссылку, чтобы получить ответ на тест. Отправь мне /balance, чтобы узнать твой текущий баланс. Отправь мне /pay чтобы пополнить баланс',
-                                    $client, $chat_id, [[['Помощь'=>'/help'], ['Баланс'=>'/balance']], [['Пополнить'=>'/pay'], ['Выйти'=>'/exit']]]);
-                                break;
-                            case '/balance':
-                                $answerFromBd = getLineWithCertainUIDFromBD($chat_id, $pdo);
-                                $balance = $answerFromBd[0]['userBalance'];
-                                $freeUrls = $answerFromBd[0]['freeUrls'];
-                                sendTextMessage('Ваш текущий баланс: ' . $balance . ' рублей. Осталось бесплатных ссылок на тесты: ' . $freeUrls, $client, $chat_id, []);
-                                break;
-                            case '/pay':
-                                sendTextMessage('Введите целое, больше 59 число, на которое будет пополнен баланс. Напишите /exit, чтобы выйти из оплаты', $client, $chat_id, []);
-                                $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSumm` = :waitingSumm WHERE `userId` =:userId');
-                                $statement->execute(array('userId' => $chat_id, 'waitingSumm' => 1));
-                                break;
-                            case '/exit':
-                                sendTextMessage('Вы вышли из оплаты', $client, $chat_id, []);
-                                $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSumm` = :waitingSumm WHERE `userId` =:userId');
-                                $statement->execute(array('userId' => $chat_id, 'waitingSum' => 0));
+                            case '➡'://следующая фотография | next photo
+                                $answerFromBd = getLineWithCertainUIDFromBD($chatId, $pdo);
+                                $prevIsbn = $answerFromBd[0]['lastISBN'];
+                                $newIsbn = substr($prevIsbn, 0, strpos($prevIsbn, '/')+1).(string)((int)(substr($prevIsbn, strpos($prevIsbn, '/')+1))+1);
+                                if(file_exists($pathToIsbns.$newIsbn.'.jpeg')) {
+                                    if(checkTime($pdo, $chatId, $client) != "empty balance") {
+                                        sendPhoto($pathToIsbns.$newIsbn.'.jpeg', $client, $chatId);
+                                        updatePhotoInfo($pdo, $chatId, $newIsbn);
+                                    }
+                                } else {
+                                    sendTextMessage('Извините, я не нашел такого фото.', $client, $chatId);
+                                }
                                 break;
                             default:
-                                $answerFromBd = getLineWithCertainUIDFromBD($chat_id, $pdo);
+                                $answerFromBd = getLineWithCertainUIDFromBD($chatId, $pdo);
                                 $balance = $answerFromBd[0]['userBalance'];
                                 $freeDays = $answerFromBd[0]['freeDays'];
                                 $waitingSum = $answerFromBd[0]['waitingSum'];
-                                if(substr($text, 0, 5) == "/isbn") {
-                                    if(checkTime($pdo, $chat_id, $client)) {//проверка бесплатного временного интервала | check free time interval
-                                        if(file_exists($pathToIsbns.substr($text, 6).'.jpeg')) {
-                                            sendPhoto($pathToIsbns.substr($text, 6).'.jpeg', $client, $chat_id, []);
-                                        }
-                                        else {
-                                            sendTextMessage('Извините, я не нашел такого фото.', $client, $chat_id, []);
-                                        }
-                                    }
-                                    else {
-                                        if($freeDays > 0 || $balance > 0) {
-                                            if(file_exists($pathToIsbns.substr($text, 6).'.jpeg')){
-                                                sendPhoto($pathToIsbns.substr($text, 6).'.jpeg', $client, $chat_id, []);
-                                                checkTime($pdo, $chat_id, $client);
-                                            }
-                                            else {
-                                                sendTextMessage('Извините, я не нашел такого фото.', $client, $chat_id, []);
-                                            }
-                                        }
-                                        else {
-                                            sendTextMessage('У вас не осталось бесплатных попыток. Пожалуйста, пополните баланс используя команду /pay', $client, $chat_id, []);
-                                        }
-                                    }
-
-                                }
-                                else {
-                                    if ($waitingSum == 1) {//бот ждет суммы пополнения | bot is waiting sum of pay
-                                        if (is_positive_int($text)) {
-                                            if ((int)$text <= 59) {
-                                                sendTextMessage('Пожалуйста, введите число большее 59', $client, $chat_id, []);
-                                            } else {
-                                                if ((int)$text > 10000) {
-                                                    sendTextMessage('Пожалуйста, введите число меньшее 10000', $client, $chat_id, []);
-                                                } else {
-                                                    $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSumm` = :waitingSumm WHERE `userId` =:userId');
-                                                    $statement->execute(array('userId' => $chat_id, 'waitingSum' => 0));
-                                                    sendInvoice($client, $chat_id, $text);
-                                                }
-                                            }
+                                if ($waitingSum == 1) {//бот ждет суммы пополнения | bot is waiting sum of pay
+                                    if (stringIsPositiveInt($text)) {
+                                        if ((int)$text <= 59) {
+                                            sendTextMessage('Пожалуйста, введите число большее 59', $client, $chatId);
                                         } else {
-                                            sendTextMessage('Введите целое положительное число, большее 59 или напишите /exit, чтобы выйти из оплаты', $client, $chat_id, []);
-                                        }
-                                    } else {//ссылка на тест | message text contains link on test
-                                        $answers = [];
-                                        if(checkTime($pdo, $chat_id, $client))
-                                        {
-                                            $answers = getAnswers($text);
-                                            if (count($answers) != 0) {
-                                                for ($i = 0; $i < count($answers); $i++) {
-                                                    sendTextMessage($answers[$i], $client, $chat_id, []);
-                                                }
+                                            if ((int)$text > 10000) {
+                                                sendTextMessage('Пожалуйста, введите число меньшее 10000', $client, $chatId);
                                             } else {
-                                                sendTextMessage('Извините, не удалось получить ответ на тест. Деньги с вашего баланса не списаны. Попробуйте ещё раз или напишите админу', $client, $chat_id, []);
+                                                $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSum` = :waitingSum WHERE `userId` =:userId');
+                                                $statement->execute(array('userId' => $chatId, 'waitingSum' => 0));
+                                                sendInvoice($client, $chatId, $text);
                                             }
                                         }
-                                        else{
-                                            if ($freeDays > 0 || $balance > 0) {
-                                                $answers = getAnswers($text);
-                                                if (count($answers) != 0) {
-                                                    for ($i = 0; $i < count($answers); $i++) {
-                                                        sendTextMessage($answers[$i], $client, $chat_id, []);
-                                                    }
-                                                    checkTime($pdo, $chat_id, $client);
-                                                } else {
-                                                    sendTextMessage('Извините, не удалось получить ответ на тест. Деньги с вашего баланса не списаны. Попробуйте ещё раз или напишите админу', $client, $chat_id, []);
-                                                }
-                                            } else {
-                                                sendTextMessage('У вас не осталось бесплатных попыток. Пожалуйста, пополните баланс используя команду /pay', $client, $chat_id, []);
-                                            }
+                                    } else {
+                                        sendTextMessage('Введите целое положительное число, большее 59 или нажмите кнопку выход, чтобы прервать оплату', $client, $chatId);
+                                    }
+                                } else {//пользователь прислал isbn | user sent isbn
+                                    if(file_exists($pathToIsbns.$text.'.jpeg')){
+                                        if(checkTime($pdo, $chatId, $client) != "empty balance") {
+                                            sendPhoto($pathToIsbns.$text.'.jpeg', $client, $chatId);
+                                            updatePhotoInfo($pdo, $chatId, $text);
                                         }
+                                    } else {
+                                        sendTextMessage('Извините, я не нашел такого фото.', $client, $chatId);
                                     }
                                 }
                                 break;
@@ -188,22 +167,21 @@ while (true) {//основной цикл | main loop
                     break;
                 case 'messagePaymentSuccessfulBot'://обработка успешного платежа | successful payment handle
                     $sum = $update['message']['content']['total_amount']/100;
-                    $preBalance = getLineWithCertainUIDFromBD($chat_id, $pdo)[0]['userBalance'];
+                    $preBalance = getLineWithCertainUIDFromBD($chatId, $pdo)[0]['userBalance'];
                     $nowBalance = $preBalance + $sum;
                     $statement = $pdo->prepare('UPDATE `userInfo` SET `userBalance` = :userBalance WHERE `userId` =:userId');
-                    $statement->execute(array('userId' => $chat_id, 'userBalance' => $nowBalance));
-                    sendTextMessage('Вы успешно пополнили баланс на '.$sum.' рублей. Теперь он составляет '.$nowBalance.' рублей', $client, $chat_id, []);
-                    $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSumm` = :waitingSumm WHERE `userId` =:userId');
-                    $statement->execute(array('userId' => $chat_id, 'waitingSum' => 0));
+                    $statement->execute(array('userId' => $chatId, 'userBalance' => $nowBalance));
+                    sendTextMessage('Вы успешно пополнили баланс на '.$sum.' рублей. Теперь он составляет '.$nowBalance.' рублей', $client, $chatId);
+                    $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSum` = :waitingSum WHERE `userId` =:userId');
+                    $statement->execute(array('userId' => $chatId, 'waitingSum' => 0));
                     break;
             }
             break;
-
         case 'updateNewPreCheckoutQuery'://обработка запроса перед оформлением платежа | handle pre checkout query
-            $query_id = $update['id'];
+            $queryId = $update['id'];
             $query = json_encode([
                 '@type' => 'answerPreCheckoutQuery',
-                'pre_checkout_query_id' => $query_id,
+                'pre_checkout_query_id' => $queryId,
                 'error_message' => '']);
             td_json_client_send($client, $query);
             break;
@@ -212,49 +190,75 @@ while (true) {//основной цикл | main loop
 
 
 //функция получения строки из базы данных по определенному user id | function for getting a string from the database by a certain user id
-function getLineWithCertainUIDFromBD($chat_id, $pdo){
+function getLineWithCertainUIDFromBD($chatId, $pdo){
     $statement = $pdo->prepare('SELECT * FROM `userInfo` WHERE `userId` = :userId');
-    $statement->execute(array('userId' => $chat_id));
+    $statement->execute(array('userId' => $chatId));
     $answerFromBd = $statement->fetchAll();
     return $answerFromBd;
 }
 
-//тестовая функция для получения тестовых ответов | test function for getting test answers
-function getAnswers($testUrl){
-    $answers = [];
-    if($testUrl == 'рабочая ссылка'){
-        $answers = [0 => 'first answer', 1 => 'second answer', 2 => 'third answer'];
-    }
-    return $answers;
-}
-
 //функция для отправки текстового сообщения | function for sending text message
-function sendTextMessage($MessageText, $client, $chat_id, $keyboard_buttons){
-    $reply_markup = [
+function sendTextMessage($messageText, $client, $chatId){
+    $keyboardType = [
+      '@type' => 'keyboardButtonTypeText'
+    ];
+    $keyboardButtons = [
+        [
+            ['@type' => 'keyboardButton',
+             'text' => 'помощь',
+             'type' => $keyboardType
+            ],
+            ['@type' => 'keyboardButton',
+                'text' => 'баланс',
+                'type' => $keyboardType
+            ]
+        ],
+        [
+            ['@type' => 'keyboardButton',
+                'text' => 'пополнить',
+                'type' => $keyboardType
+            ],
+            ['@type' => 'keyboardButton',
+                'text' => 'выход',
+                'type' => $keyboardType
+            ]
+        ],
+        [
+            ['@type' => 'keyboardButton',
+                'text' => '⬅',
+                'type' => $keyboardType
+            ],
+            ['@type' => 'keyboardButton',
+                'text' => '➡',
+                'type' => $keyboardType
+            ]
+        ]
+        ];
+    $replyMarkup = [
         '@type'=>'replyMarkupShowKeyboard',
-        'rows'=> [[['Помощь'=>'/help'], ['Баланс'=>'/balance']], [['Пополнить'=>'/pay'], ['Выйти'=>'/exit']]],
+        'rows'=> $keyboardButtons,
         'resize_keyboard'=>true,
-        'one_time'=>true,
+        'one_time'=>false,
         'is_personal'=>true];
-    $formatted_text = ['text' => $MessageText, 'entities' => []];
-    $input_message = [
+    $formattedText = ['text' => $messageText, 'entities' => null];
+    $inputMessage = [
         '@type' => 'inputMessageText',
-        'text' => $formatted_text,
+        'text' => $formattedText,
         'disable_web_page_preview' => false,
         'clear_draft' => false];
     $query = json_encode([
         '@type' => 'sendMessage',
-        'chat_id' => $chat_id,
+        'chat_id' => $chatId,
         'reply_to_message_id' => '0',
         'disable_notification' => false,
         'from_background' => false,
-        'reply_markup' => $reply_markup,
-        'input_message_content' => $input_message]);
+        'reply_markup' => $replyMarkup,
+        'input_message_content' => $inputMessage]);
     td_json_client_send($client, $query);
 }
 
 //функция, которая проверяет является ли число положительным и целым | function that checks whether a number is positive and integer
-function is_positive_int($num){
+function stringIsPositiveInt($num){
   $intNum = (int) $num;
   return ($intNum == $num && is_int($intNum) && $num > 0);
 }
@@ -262,87 +266,84 @@ function is_positive_int($num){
 
 //функция, которая проверяет прошло ли 24 с момента предыдущего снятия денег с баланса | function that checks
 // whether 24 hours have passed since the previous withdrawal of money from the balance
-function checkTime($pdo, $chat_id, $client){
-    $answerFromBd = getLineWithCertainUIDFromBD($chat_id, $pdo);
+function checkTime($pdo, $chatId, $client){
+    $answerFromBd = getLineWithCertainUIDFromBD($chatId, $pdo);
     $dateFromBD = $answerFromBd[0]['lastTime'];
     $dateFromBDInSec = strtotime($answerFromBd[0]['lastTime']);
     $dateNow = date("Y-m-d H:i:s");
     $dateNowInSec = strtotime(date("Y-m-d H:i:s"));
     $balance = $answerFromBd[0]['userBalance'];
     $freeDays = $answerFromBd[0]['freeDays'];
-    if($dateFromBD == null){//пользователь ниразу не пользовался
+    if($dateFromBD == null){//пользователь ни разу не пользовался
         $freeDays -=1;
         $statement = $pdo->prepare('UPDATE `userInfo` SET `freeDays` = :freeDays WHERE `userId` =:userId');
-        $statement->execute(array('userId' => $chat_id, 'freeDays' => $freeDays));
+        $statement->execute(array('userId' => $chatId, 'freeDays' => $freeDays));
         $statement = $pdo->prepare('UPDATE `userInfo` SET `lastTime` = :lastTime WHERE `userId` =:userId');
-        $statement->execute(array('userId' => $chat_id, 'lastTime' => $dateNow));
-        return false;
-    }
-    else{
+        $statement->execute(array('userId' => $chatId, 'lastTime' => $dateNow));
+    } else {
         if($dateNowInSec - $dateFromBDInSec >= 100){//прошло 24 часа
             if($freeDays > 0){
                 $freeDays -= 1;
                 $statement = $pdo->prepare('UPDATE `userInfo` SET `freeDays` = :freeDays WHERE `userId` =:userId');
-                $statement->execute(array('userId' => $chat_id, 'freeDays' => $freeDays));
-            }
-            else{
-                if(balance > 0){
+                $statement->execute(array('userId' => $chatId, 'freeDays' => $freeDays));
+                sendTextMessage('С вашего аккаунта списан один рубль.', $client, $chatId,[]);
+                $statement = $pdo->prepare('UPDATE `userInfo` SET `lastTime` = :lastTime WHERE `userId` =:userId');
+                $statement->execute(array('userId' => $chatId, 'lastTime' => $dateNow));
+            } else{
+                if($balance > 0){
                     $balance -= 1;
                     $statement = $pdo->prepare('UPDATE `userInfo` SET `userBalance` = :userBalance WHERE `userId` =:userId');
-                    $statement->execute(array('userId' => $chat_id, 'userBalance' => $balance));
+                    $statement->execute(array('userId' => $chatId, 'userBalance' => $balance));
+                    sendTextMessage('С вашего аккаунта списан один рубль.', $client, $chatId,[]);
+                    $statement = $pdo->prepare('UPDATE `userInfo` SET `lastTime` = :lastTime WHERE `userId` =:userId');
+                    $statement->execute(array('userId' => $chatId, 'lastTime' => $dateNow));
+                } else{
+                    sendTextMessage('Извините, на вашем балансе недостаточно суммы для выполнения операции.', $client, $chatId,[]);
+                    return 'empty balance';
                 }
             }
-            sendTextMessage('С вашего аккаунта списан один рубль.', $client, $chat_id,[]);
-            $statement = $pdo->prepare('UPDATE `userInfo` SET `lastTime` = :lastTime WHERE `userId` =:userId');
-            $statement->execute(array('userId' => $chat_id, 'lastTime' => $dateNow));
-            return false;
-        }
-        else{
-            return true;
         }
     }
 }
 
 
 //функция, которая отправляет фото | function that send photo
-function sendPhoto($path, $client, $chat_id, $keyboard_buttons){
+function sendPhoto($path, $client, $chatId, $captionText = null){
     $photo = [
         '@type' => 'inputFileLocal',
         'path' => $path
     ];
-    $reply_markup = [
-        '@type'=>'replyMarkupShowKeyboard',
-        'rows'=>$keyboard_buttons,
-        'resize_keyboard'=>true,
-        'one_time'=>false,
-        'is_personal'=>true];
-    $input_message = [
+    $caption = [
+      'text' => $captionText,
+      'entities' => null
+    ];
+    $inputMessage = [
         '@type' => 'inputMessagePhoto',
         'photo'=>$photo,
         'thumbnail' => null,
         'added_sticker_file_ids' => null,
         'width' => getimagesize($path)[0],
         'height' => getimagesize($path)[1],
-        'caption' => null,
+        'caption' => $caption,
         'ttl' => 0];
     $query = json_encode([
         '@type' => 'sendMessage',
-        'chat_id' => $chat_id,
+        'chat_id' => $chatId,
         'reply_to_message_id' => '0',
         'disable_notification' => false,
         'from_background' => false,
-        'reply_markup' => $reply_markup,
-        'input_message_content' => $input_message]);
+        'reply_markup' => null,
+        'input_message_content' => $inputMessage]);
     td_json_client_send($client, $query);
 }
 
 
 //функция, которая отправляет счёт | function that send invoice
-function sendInvoice($client, $chat_id, $text){
-    $price_parts = [['label' => 'руб', 'amount' => ((int)$text) * 100]];
+function sendInvoice($client, $chatId, $text){
+    $priceParts = [['label' => 'руб', 'amount' => ((int)$text) * 100]];
     $invoice = [
         'currency' => 'RUB',
-        'price_parts' => $price_parts,
+        'priceParts' => $priceParts,
         'is_test' => true,
         'need_name' => false,
         'need_phone_number' => false,
@@ -351,7 +352,7 @@ function sendInvoice($client, $chat_id, $text){
         'send_phone_number_to_provider' => false,
         'send_email_address_to_provider' => false,
         'is_flexible' => false];
-    $input_message = [
+    $inputMessage = [
         '@type' => 'inputMessageInvoice',
         'invoice' => $invoice,
         'title' => 'Пополнение баланса',
@@ -362,7 +363,13 @@ function sendInvoice($client, $chat_id, $text){
     ];
     $query = json_encode([
         '@type' => 'sendMessage',
-        'chat_id' => $chat_id,
-        'input_message_content' => $input_message]);
+        'chat_id' => $chatId,
+        'input_message_content' => $inputMessage]);
     td_json_client_send($client, $query);
+}
+
+//обновление последнего фото | update last photo
+function updatePhotoInfo($pdo, $chatId, $isbn){
+    $statement = $pdo->prepare('UPDATE `userInfo` SET `lastISBN` = :lastISBN WHERE `userId` =:userId');
+    $statement->execute(array('userId' => $chatId, 'lastISBN' => $isbn));
 }
