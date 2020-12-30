@@ -1,9 +1,9 @@
 <?php
-$botToken = '1278159311:AAFScj8Om-XoL-8h59PDDvzZXS_gRolJwaM';
+$botToken = 'TOKEN';
 $td_parameters = [
-    'api_id' => '425178' ,
-    'api_hash' => 'a47dce755a2fb2099b7d3f462196c7b1',
-    'database_directory' => '../home/hellfingers/to_write',
+    'api_id' => 'API_ID' ,
+    'api_hash' => 'API_HASH',
+    'database_directory' => '../home/path/to_write',
     'use_message_database' => true,
     'use_secret_chats' => true,
     'system_language_code' => 'en-GB',
@@ -11,12 +11,12 @@ $td_parameters = [
     'system_version' => '5.0.2',
     'application_version' => '1.1.1'
 ];
-$host = '194.67.111.111';
-$db   = 'hellfingers';
-$user = 'hellfingers';
-$pass = 'Hellfingers20!';
+$host = '';
+$db   = '';
+$user = '';
+$pass = '';
 $charset = 'utf8';
-$pathToIsbns = '/home/hellfigers/PhpstormProjects/cdz/ISBNS/';
+$pathToIsbns = '/home/path/ISBNS/';//директория, где хранятся фотографии с ответами | directory where stores photos with answers
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $opt = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
