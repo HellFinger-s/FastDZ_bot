@@ -1,9 +1,9 @@
 <?php
-$botToken = 'TOKEN';
+$botToken = '1496175647:AAG2syVnKrOSTW57Y-WkkypAo1d-hAeZRD8';
 $td_parameters = [
-    'api_id' => 'API_ID' ,
-    'api_hash' => 'API_HASH',
-    'database_directory' => '../home/path/to_write',
+    'api_id' => '425178' ,
+    'api_hash' => 'a47dce755a2fb2099b7d3f462196c7b1',
+    'database_directory' => '../home/hellfingers/to_write',
     'use_message_database' => true,
     'use_secret_chats' => true,
     'system_language_code' => 'en-GB',
@@ -11,12 +11,12 @@ $td_parameters = [
     'system_version' => '5.0.2',
     'application_version' => '1.1.1'
 ];
-$host = '';
-$db   = '';
-$user = '';
-$pass = '';
+$host = '194.67.111.111';
+$db   = 'hellfingers';
+$user = 'hellfingers';
+$pass = 'Hellfingers20!';
 $charset = 'utf8';
-$pathToIsbns = '/home/path/ISBNS/';//директория, где хранятся фотографии с ответами | directory where stores photos with answers
+$pathToIsbns = '/home/hellfigers/PhpstormProjects/cdz/ISBNS/';//директория, где хранятся фотографии с ответами | directory where stores photos with answers
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $opt = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -27,7 +27,7 @@ $pdo = new PDO($dsn, $user, $pass, $opt);
 $id = false;
 $client = td_json_client_create();
 td_json_client_send($client,json_encode(['@type' => 'setLogVerbosityLevel', 'new_verbosity_level' => '3']));
-$result = td_json_client_execute($client, json_encode(['@typ' => 'getAuthorizationState']));
+$result = td_json_client_execute($client, json_encode(['@type' => 'getAuthorizationState']));
 
 while (true) {//основной цикл | main loop
     $res = td_json_client_receive($client, 10);
@@ -85,7 +85,7 @@ while (true) {//основной цикл | main loop
                                 sendPhoto('/home/hellfigers/PhpstormProjects/cdz/button.jpeg', $client, $chatId, 'Так же управлять мной ты можешь с помощью интерактивной панели с кнопками, которую ты откроешь нажав на кнопку в телеграм');
                                 break;
                             case 'помощь':// user need help
-                                sendTextMessage('отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Пополнить баланс ты можешь, написав мне пополнить.',
+                                sendTextMessage('отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен на фоографии выше.',
                                     $client, $chatId);
                                 sendPhoto('/home/hellfigers/PhpstormProjects/cdz/ex.jpeg', $client, $chatId);
                                 break;
@@ -95,7 +95,7 @@ while (true) {//основной цикл | main loop
                                 sendTextMessage('Ваш текущий баланс: ' . $balance . ' рублей.', $client, $chatId);
                                 break;
                             case 'пополнить':// user want to pay
-                                sendTextMessage('Введите целое, больше 59 число, на которое будет пополнен баланс. Напишите /exit, чтобы выйти из оплаты', $client, $chatId);
+                                sendTextMessage('Введите целое, больше 59 число, на которое будет пополнен баланс. Напишите выход, чтобы выйти из оплаты', $client, $chatId);
                                 $statement = $pdo->prepare('UPDATE `userInfo` SET `waitingSum` = :waitingSum WHERE `userId` =:userId');
                                 $statement->execute(array('userId' => $chatId, 'waitingSum' => 1));
                                 break;
@@ -158,7 +158,7 @@ while (true) {//основной цикл | main loop
                                             updatePhotoInfo($pdo, $chatId, $text);
                                         }
                                     } else {
-                                        sendTextMessage('Извините, я не нашел такого фото.', $client, $chatId);
+                                        sendTextMessage('Извините, я не нашел такого фото. Если вы вводили вторым параметром номер страницы, попробуйте ввести номер задания и наоборот.', $client, $chatId);
                                     }
                                 }
                                 break;
@@ -340,10 +340,12 @@ function sendPhoto($path, $client, $chatId, $captionText = null){
 
 //функция, которая отправляет счёт | function that send invoice
 function sendInvoice($client, $chatId, $text){
-    $priceParts = [['label' => 'руб', 'amount' => ((int)$text) * 100]];
+    $priceParts = [['label' => 'руб', 'amount' => (int)$text*100]];
+    var_dump("INVOICE");
+    var_dump((int)$text * 100);
     $invoice = [
         'currency' => 'RUB',
-        'priceParts' => $priceParts,
+        'price_parts' => $priceParts,
         'is_test' => true,
         'need_name' => false,
         'need_phone_number' => false,
@@ -358,7 +360,7 @@ function sendInvoice($client, $chatId, $text){
         'title' => 'Пополнение баланса',
         'description' => 'Нажми на кнопку ниже, чтобы перейти к оплате ⬇️',
         'payload' => base64_encode('12'),
-        'provider_token' => '401643678:TEST:650d6b16-cc82-470b-b66b-88ea3bc42acd',
+        'provider_token' => '401643678:TEST:ee462abe-f47e-448a-94a5-ad5f04a7cd8e',
         'start_parameter' => 'start'
     ];
     $query = json_encode([
@@ -366,6 +368,8 @@ function sendInvoice($client, $chatId, $text){
         'chat_id' => $chatId,
         'input_message_content' => $inputMessage]);
     td_json_client_send($client, $query);
+    var_dump($query);
+    var_dump("INVOICE");
 }
 
 //обновление последнего фото | update last photo
