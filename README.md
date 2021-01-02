@@ -9,4 +9,4 @@
    При разработке бота я использовал:
    * [Telegram Database Library](https://github.com/tdlib/td)
    * Язык программирования PHP
-   * [Расширения для PHP, позволяющее работать с TDLib](https://github.com/yaroslavche/phptdlib)
+   * [Расширение для PHP, позволяющее работать с TDLib](https://github.com/yaroslavche/phptdlib)
