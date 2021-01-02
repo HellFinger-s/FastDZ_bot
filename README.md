@@ -7,6 +7,6 @@
     Пользователь платит 1 рубль раз в день только тогда, когда он пользуется ботом.
 ### Используемые технологии
     При разработке бота я использовал
-     * [Telegram Database Library](https://github.com/tdlib/td)
-     * Язык программирования PHP
-     * [Расширения для PHP, позволяющее работать с TDLib](https://github.com/yaroslavche/phptdlib)
+    [Telegram Database Library](https://github.com/tdlib/td)
+    Язык программирования PHP
+    [Расширения для PHP, позволяющее работать с TDLib](https://github.com/yaroslavche/phptdlib)
