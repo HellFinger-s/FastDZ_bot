@@ -1,9 +1,9 @@
 <?php
-$botToken = 'token';
+$botToken = '1496175647:AAG2syVnKrOSTW57Y-WkkypAo1d-hAeZRD8';
 $td_parameters = [
-    'api_id' => 'api_id' ,
-    'api_hash' => 'api_hash',
-    'database_directory' => '../home/path/to_write',
+    'api_id' => '425178' ,
+    'api_hash' => 'a47dce755a2fb2099b7d3f462196c7b1',
+    'database_directory' => '../home/hellfingers/to_write',
     'use_message_database' => true,
     'use_secret_chats' => true,
     'system_language_code' => 'en-GB',
@@ -11,12 +11,12 @@ $td_parameters = [
     'system_version' => '5.0.2',
     'application_version' => '1.1.1'
 ];
-$host = '';
+$host = '194.67.111.111';
 $db   = 'hellfingers';
-$user = '';
-$pass = '';
+$user = 'hellfingers';
+$pass = 'Hellfingers20!';
 $charset = 'utf8';
-$pathToIsbns = '/home/path/ISBNS/';//директория, где хранятся фотографии с ответами | directory where stores photos with answers
+$pathToIsbns = '/home/hellfigers/PhpstormProjects/cdz/ISBNS/';//директория, где хранятся фотографии с ответами | directory where stores photos with answers
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $opt = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -70,22 +70,22 @@ while (true) {//основной цикл | main loop
                                 $freeDays = getLineWithCertainUIDFromBD($chatId, $pdo)[0]['freeDays'];
                                 switch($freeDays){//обработка разного количества оставшихся бесплатных дней | handle different number of remaining free days
                                     case 1:
-                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатный день. Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить.',
+                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатный день. Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить. С помощью кнопок ⬅ и ➡ ты можешь получить соседние страницы/номера',
                                             $client, $chatId);
                                         break;
                                     case 0:
-                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатных дней. Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить.',
+                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатных дней. Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить. С помощью кнопок ⬅ и ➡ ты можешь получить соседние страницы/номера',
                                             $client, $chatId);
                                         break;
                                     default:
-                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатных дня.  Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить.',
+                                        sendTextMessage('Привет, отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен ниже. Если тебе нужна помощь, напиши мне помощь. Сейчас у тебя есть '.$freeDays.' бесплатных дня.  Когда они закончатся, 24 часа пользования ботом будут стоить 1 рубль. Пополнить баланс ты можешь, написав мне пополнить. С помощью кнопок ⬅ и ➡ ты можешь получить соседние страницы/номера',
                                             $client, $chatId);
                                 }
-                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/ex.jpeg', $client, $chatId, 'Для этой книги нужно отправить мне сообщение формата 5-358-00257-X/YY');
-                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/button.jpeg', $client, $chatId, 'Так же управлять мной ты можешь с помощью интерактивной панели с кнопками, которую ты откроешь нажав на кнопку в телеграм');
+                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/ex.jpeg', $client, $chatId, 'Для этой книги нужно отправить мне сообщение формата 5-358-00257-X/YY, где YY - номер страницы или задания');
+                                sendPhoto('/home/hellfigers/PhpstormProjects/cdz/button.jpeg', $client, $chatId, 'Так же управлять мной ты можешь с помощью интерактивной панели с кнопками, которую ты откроешь, нажав обведенную на фотографии кнопку в телеграм');
                                 break;
                             case 'помощь':// user need help
-                                sendTextMessage('отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен на фоографии выше.',
+                                sendTextMessage('отправь мне сообщение в формате XX/YY, где XX - ISBN книги, а YY - номер страницы или задания. ISBN ты найдешь на одной из первых страниц учебника, пример приведен на фотографии ниже. С помощью кнопок ⬅ и ➡ ты можешь получить соседние страницы/номера',
                                     $client, $chatId);
                                 sendPhoto('/home/hellfigers/PhpstormProjects/cdz/ex.jpeg', $client, $chatId);
                                 break;
@@ -341,6 +341,8 @@ function sendPhoto($path, $client, $chatId, $captionText = null){
 //функция, которая отправляет счёт | function that send invoice
 function sendInvoice($client, $chatId, $text){
     $priceParts = [['label' => 'руб', 'amount' => (int)$text*100]];
+    var_dump("INVOICE");
+    var_dump((int)$text * 100);
     $invoice = [
         'currency' => 'RUB',
         'price_parts' => $priceParts,
@@ -358,7 +360,7 @@ function sendInvoice($client, $chatId, $text){
         'title' => 'Пополнение баланса',
         'description' => 'Нажми на кнопку ниже, чтобы перейти к оплате ⬇️',
         'payload' => base64_encode('12'),
-        'provider_token' => 'token',
+        'provider_token' => '401643678:TEST:ee462abe-f47e-448a-94a5-ad5f04a7cd8e',
         'start_parameter' => 'start'
     ];
     $query = json_encode([
@@ -366,6 +368,8 @@ function sendInvoice($client, $chatId, $text){
         'chat_id' => $chatId,
         'input_message_content' => $inputMessage]);
     td_json_client_send($client, $query);
+    var_dump($query);
+    var_dump("INVOICE");
 }
 
 //обновление последнего фото | update last photo
