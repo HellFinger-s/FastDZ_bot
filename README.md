@@ -10,6 +10,7 @@
    * [Telegram Database Library](https://github.com/tdlib/td)
    * Язык программирования PHP
    * [Расширение для PHP, позволяющее работать с TDLib](https://github.com/yaroslavche/phptdlib)
+### [Ссылка на демонстрационный ролик](https://radikal.ru/video/BJX8uqd9sU3)
    
    
 # Telegrams bot with the answers to the Homework
@@ -24,3 +25,4 @@
    * [Telegram Database Library](https://github.com/tdlib/td)
    * Programming language PHP
    * [PHP extention, which allows to work with TDLib](https://github.com/yaroslavche/phptdlib)
+### [Link on demostration video](https://radikal.ru/video/8atWkSLbFbg)
