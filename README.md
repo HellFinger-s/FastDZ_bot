@@ -4,7 +4,7 @@
    Most of these web pages contain a lot of advertising, some of them even provide services for a permanent subscription of 30 rubles / day.
    I think that this price is unaffordable for the average student. Also search through the name of the subject/author of the book
    can be simplified. I developed a bot that used the book's ISBN (unique book item number) to navigate through the answers.
-   The user pays 1 ruble once a day only for the days on which he uses the bot.
+   The user pays 1 ruble once a day only for the days on which he uses the bot. In 2017, it was the only working bot in this area.
 ### **Used technologies**
    In developing I use:
    * [Telegram Database Library](https://github.com/tdlib/td)
@@ -20,7 +20,7 @@
    В большинстве своем на этих существующих веб страницах присутствует много рекламы, часть вообще предоставляет услуги по постоянной подписке 30 рублей/день.
    Я считаю, что эта цена является неподъемной для среднестатистического школьника. Так же поиск через название предмета/автора книги
    можно упростить. Мною был разработан бот, который для навигации по ответам использовал ISBN книги (уникальный номер книжного изделия).
-   Пользователь платит 1 рубль раз в день только за те дни, в которые он пользуется ботом.
+   Пользователь платит 1 рубль раз в день только за те дни, в которые он пользуется ботом. В 2017 это был единственный работающий бот в этой области.
 ### **Используемые технологии**
    При разработке бота я использовал:
    * [Telegram Database Library](https://github.com/tdlib/td)
